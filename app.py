@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import joblib
 import pandas as pd
 import numpy as np
@@ -33,13 +34,17 @@ def get_prediction(num_client):
     proba = f"Nous estimons la probabilité de default du client à : {results['proba_default'].values[0]*100:.2f}%"
     return verdict, proba
 
+def st_shap(plot, height=None):
+   shap_html = f"<head>{shap.getjs()}</head><body>{plot.html()}</body>"
+   components.html(shap_html, height=height)
 
 def get_explanation(num_client):
     scaled_data = scaler.transform(data)
     idx = pred_data.index[pred_data["client_num"]==num_client].values[0]
     data_idx = scaled_data[idx].reshape(1,-1)
     shap_values = explainer.shap_values(data_idx, l1_reg="aic")
-    fig = shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0], feature_names=data.columns, matplotlib=True)
+    st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0],feature_names=data.columns))
+    #fig = shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0], feature_names=data.columns, matplotlib=True)
     df_shap = pd.DataFrame(shap_values[1], columns=data.columns)
     list_feat = []
     for i in range(10):
@@ -47,7 +52,7 @@ def get_explanation(num_client):
         list_feat.append(max_col)
         df_shap.drop(max_col, axis=1, inplace=True)
     df_feat = data[data.index==num_client][list_feat].transpose().round(2)
-    return(fig, df_feat)
+    return(df_feat)
 
 
 # Configures the default settings of the page (must be the first streamlit command and must be set once)
@@ -69,12 +74,9 @@ with st.container():
        verdict, proba = get_prediction(option)
        st.write(verdict)
        st.write(proba)
-  st.markdown('##')
-  with st.container():
-    st.write("Une fois la prédiction effectuée, obtenez le détail en cliquant ci-dessous")
-    if st.button("Détail"):
-       fig, df_feat = get_explanation(option)
-       st.pyplot(fig)
+       df_feat = get_explanation(option)
+       #fig, df_feat = get_explanation(option)
+       #st.pyplot(fig)
        st.dataframe(df_feat)
   st.markdown('#')
   with st.container():
