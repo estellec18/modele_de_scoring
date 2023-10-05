@@ -40,7 +40,14 @@ def get_explanation(num_client):
     data_idx = scaled_data[idx].reshape(1,-1)
     shap_values = explainer.shap_values(data_idx, l1_reg="aic")
     fig = shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0], feature_names=data.columns, matplotlib=True)
-    return(fig)
+    df_shap = pd.DataFrame(shap_values[1], columns=data.columns)
+    list_feat = []
+    for i in range(10):
+        max_col = df_shap.max().idxmax()
+        list_feat.append(max_col)
+        df_shap.drop(max_col, axis=1, inplace=True)
+    df_feat = data[data.index==num_client][list_feat].transpose().round(2)
+    return(fig, df_feat)
 
 
 # Configures the default settings of the page (must be the first streamlit command and must be set once)
@@ -66,8 +73,9 @@ with st.container():
   with st.container():
     st.write("Une fois la prédiction effectuée, obtenez le détail en cliquant ci-dessous")
     if st.button("Détail"):
-       fig = get_explanation(option)
+       fig, df_feat = get_explanation(option)
        st.pyplot(fig)
+       st.dataframe(df_feat)
   st.markdown('#')
   with st.container():
      st.write("❗Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel.❗")
