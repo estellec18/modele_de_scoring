@@ -45,6 +45,8 @@ def get_explanation(num_client):
     shap_values = explainer.shap_values(data_idx, l1_reg="aic")
     st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0],feature_names=data.columns))
     #fig = shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0], feature_names=data.columns, matplotlib=True)
+    exp = shap.Explanation(shap_values[1], explainer.expected_value[1], data_idx, feature_names=data.columns)
+    fig = shap.plots.waterfall(exp[0])
     df_shap = pd.DataFrame(shap_values[1], columns=data.columns)
     list_feat = []
     for i in range(10):
@@ -52,7 +54,16 @@ def get_explanation(num_client):
         list_feat.append(max_col)
         df_shap.drop(max_col, axis=1, inplace=True)
     df_feat = data[data.index==num_client][list_feat].transpose().round(2)
-    return(df_feat)
+    return(fig, df_feat)
+
+def get_waterfall(num_client):
+    scaled_data = scaler.transform(data)
+    idx = pred_data.index[pred_data["client_num"]==num_client].values[0]
+    data_idx = scaled_data[idx].reshape(1,-1)
+    shap_values = explainer.shap_values(data, l1_reg="aic")
+    exp = shap.Explanation(shap_values[1], explainer.expected_value[1], data_idx, feature_names=data.columns)
+    fig = shap.plots.waterfall(exp[0])
+    return fig
 
 
 # Configures the default settings of the page (must be the first streamlit command and must be set once)
@@ -74,10 +85,12 @@ with st.container():
        verdict, proba = get_prediction(option)
        st.write(verdict)
        st.write(proba)
-       df_feat = get_explanation(option)
-       #fig, df_feat = get_explanation(option)
-       #st.pyplot(fig)
-       st.dataframe(df_feat)
+       fig, df_feat = get_explanation(option)
+       col1, col2 = st.columns([2,1], gap="medium")
+       with col1:
+        st.pyplot(fig)
+       with col2:
+        st.dataframe(df_feat)
   st.markdown('#')
   with st.container():
      st.write("❗Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel.❗")
