@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 def load_data():
-  path = '/Users/estellecampos/Documents/Reconversion/Formation OpenClassroom/Projet_7/data/clean/'
+  path = './data/clean/'
   filename = "test.csv"
   data = pd.read_csv(path + filename, index_col=0)
   data.set_index("SK_ID_CURR", inplace=True)
@@ -28,7 +28,7 @@ pred_data = pd.DataFrame({'client_num':data.index, 'prediction':prediction, "pro
 def get_prediction(num_client):
     results = pred_data[pred_data["client_num"]==num_client]
     if results["prediction"].values==0:
-        verdict="Demande de crédit acceptée 🌟"
+        verdict="Demande de crédit acceptée ✅"
     else:
         verdict="Demande de crédit refusée ⛔"
     proba = f"Nous estimons la probabilité de default du client à : {results['proba_default'].values[0]*100:.2f}%"
