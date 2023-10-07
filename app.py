@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import shap
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
@@ -40,6 +41,26 @@ def get_prediction(num_client):
         verdict="Demande de crédit refusée ⛔"
     proba = f"Nous estimons la probabilité de default du client à : {results['proba_default'].values[0]*100:.2f}%"
     return verdict, proba
+
+def gauge(num_client, seuil):
+    value = pred_data[pred_data["client_num"]==num_client]["proba_default"].values[0]
+    if value > seuil:
+        color = "orange"
+    else:
+        color = "green"
+
+    fig = go.Figure(go.Indicator(
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        value = value,
+        mode = "gauge+number+delta",
+        title = {'text': "Probabilité de défault"},
+        delta = {'reference': seuil, 'increasing': {'color': "red"}, 'decreasing': {'color': "green"}},
+        gauge = {'axis': {'range': [None, 1]},
+                'bar' : {'color':color},
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 0.56}}))
+    
+    return(fig)
+
 
 def st_shap(plot, height=None):
    shap_html = f"<head>{shap.getjs()}</head><body>{plot.html()}</body>"
@@ -132,6 +153,9 @@ with st.container():
        verdict, proba = get_prediction(option)
        st.write(verdict)
        st.write(proba)
+       fig, ax = plt.subplots()
+       fig = gauge(option, seuil_predict)
+       st.plotly_chart(fig)
        fig, df_feat = get_explanation(option)
        col1, col2 = st.columns([2,1], gap="small")
        with col1:
