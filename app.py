@@ -17,12 +17,19 @@ def load_data():
 
 data = load_data()
 
-model = joblib.load("best_logreg.joblib")
-explainer = joblib.load("explainer.joblib")
+model = joblib.load("best_xgb.joblib")
+explainer = joblib.load("explainer_xgb.joblib")
+
 scaler = model["scaler"]
-prediction = model.predict(data)
 proba = model.predict_proba(data)
-pred_data = pd.DataFrame({'client_num':data.index, 'prediction':prediction, "proba_no_default":proba.transpose()[0], "proba_default":proba.transpose()[1]})
+pred_data = pd.DataFrame({'client_num':data.index, "proba_no_default":proba.transpose()[0], "proba_default":proba.transpose()[1]})
+
+def def_seuil(df, seuil):
+   df["prediction"] = np.where(df["proba_default"] > seuil, 1, 0)
+   return df
+
+seuil_predict = 0.56
+pred_data = def_seuil(pred_data, seuil_predict)
 
 
 def get_prediction(num_client):
@@ -43,14 +50,14 @@ def get_explanation(num_client):
     idx = pred_data.index[pred_data["client_num"]==num_client].values[0]
     data_idx = scaled_data[idx].reshape(1,-1)
     shap_values = explainer.shap_values(data_idx, l1_reg="aic")
-    st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0],feature_names=data.columns))
+    #st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0],feature_names=data.columns))
     #fig = shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0], feature_names=data.columns, matplotlib=True)
     exp = shap.Explanation(shap_values[1], explainer.expected_value[1], data_idx, feature_names=data.columns)
     fig = shap.plots.waterfall(exp[0])
     df_shap = pd.DataFrame(shap_values[1], columns=data.columns)
     list_feat = []
-    for i in range(10):
-        max_col = df_shap.max().idxmax()
+    for i in range(9):
+        max_col = df_shap.abs().max().idxmax()
         list_feat.append(max_col)
         df_shap.drop(max_col, axis=1, inplace=True)
     df_feat = data[data.index==num_client][list_feat].transpose().round(2)
@@ -64,6 +71,46 @@ def get_waterfall(num_client):
     exp = shap.Explanation(shap_values[1], explainer.expected_value[1], data_idx, feature_names=data.columns)
     fig = shap.plots.waterfall(exp[0])
     return fig
+
+def position_global_distrib(det_feat, num_client):
+    list_feat = list(det_feat.index)
+    fig, axs = plt.subplots(3, 3, figsize=(15,11))
+    i = 0
+    j = 0
+    for feat in list_feat:
+        data[feat].plot(kind='hist', ax=axs[i,j])
+        axs[i,j].set_title(feat)
+        axs[i,j].axvline(x=det_feat.loc[feat,num_client], color='orange', linewidth=2)
+        j+=1
+        if j>2:
+            i+=1
+            j=0
+    fig.tight_layout()
+    return fig
+
+def position_label_distrib(det_feat, num_client):
+    pred = pred_data[pred_data["client_num"]==num_client]["prediction"].values[0]
+    basis = pred_data[pred_data["prediction"]==pred]
+    list_num = list(basis["client_num"])    
+    new_data = data.loc[list_num]
+
+    list_feat = list(det_feat.index)
+    fig, axs = plt.subplots(3, 3, figsize=(15,11))
+    i = 0
+    j = 0
+    for feat in list_feat:
+        new_data[feat].plot(kind='hist', ax=axs[i,j])
+        axs[i,j].set_title(feat)
+        axs[i,j].axvline(x=det_feat.loc[feat,num_client], color='orange', linewidth=2)
+        j+=1
+        if j>2:
+            i+=1
+            j=0
+    fig.tight_layout()
+    return fig
+
+
+## afficher seuil de décision ? sur une frise
 
 
 # Configures the default settings of the page (must be the first streamlit command and must be set once)
@@ -86,13 +133,24 @@ with st.container():
        st.write(verdict)
        st.write(proba)
        fig, df_feat = get_explanation(option)
-       col1, col2 = st.columns([2,1], gap="medium")
+       col1, col2 = st.columns([2,1], gap="small")
        with col1:
         st.pyplot(fig)
        with col2:
         st.dataframe(df_feat)
+       tab1, tab2 = st.tabs(["Positionnement du demandeur de crédit par rapport aux autres demandes", "Positionnement du demandeur de crédit par rapport aux autres demandes de sa catégorie"])
+       with tab1:
+        fig1 = position_global_distrib(df_feat, option)
+        st.pyplot(fig1)
+       with tab2:
+        fig2 = position_label_distrib(df_feat, option)
+        st.pyplot(fig2)
   st.markdown('#')
   with st.container():
      st.write("❗Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel.❗")
+
+
+
+   
 
 # from terminal : streamlit run app.py
