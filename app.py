@@ -9,32 +9,36 @@ import plotly.graph_objects as go
 
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
-def load_data():
-  path = './data/clean/'
-  filename = "test.csv"
-  data = pd.read_csv(path + filename, index_col=0)
-  data.set_index("SK_ID_CURR", inplace=True)
-  return data
-
-data = load_data()
-
 model = joblib.load("best_xgb.joblib")
 explainer = joblib.load("explainer_xgb.joblib")
-
 scaler = model["scaler"]
-proba = model.predict_proba(data)
-pred_data = pd.DataFrame({'client_num':data.index, "proba_no_default":proba.transpose()[0], "proba_default":proba.transpose()[1]})
 
-def def_seuil(df, seuil):
-   df["prediction"] = np.where(df["proba_default"] > seuil, 1, 0)
-   return df
+def load_data():
+    test = pd.read_csv('./data/clean/test.csv', index_col=0)
+    test.set_index("SK_ID_CURR", inplace=True)
+    train = pd.read_csv('./data/clean/training.csv', index_col=0)
+    train.drop("TARGET", axis=1, inplace=True)
+    train.set_index("SK_ID_CURR", inplace=True)
+    concat = pd.concat([train, test])
+    sub_df = concat.sample(frac=0.07, replace=False, random_state=42)
+    return sub_df
 
+def create_df_proba(df, seuil):
+    if seuil <= 1 and seuil >0:
+        proba = model.predict_proba(df)
+        df_proba = pd.DataFrame({'client_num':df.index, "proba_no_default":proba.transpose()[0], "proba_default":proba.transpose()[1]})
+        df_proba["prediction"] = np.where(df_proba["proba_default"] > seuil, 1, 0)
+        return df_proba
+    else:
+        print("veuillez choisir un seuil adéquat")
+        return
+
+data = load_data() # subsample composé de 10% des observations issues du training set + test set
 seuil_predict = 0.56
-pred_data = def_seuil(pred_data, seuil_predict)
+pred_data = create_df_proba(data, seuil_predict) # df qui indique la proba de default / de non défault / la décision
 
-
-def get_prediction(num_client):
-    results = pred_data[pred_data["client_num"]==num_client]
+def get_prediction(df, num_client):
+    results = df[df["client_num"]==num_client]
     if results["prediction"].values==0:
         verdict="Demande de crédit acceptée ✅"
     else:
@@ -42,8 +46,8 @@ def get_prediction(num_client):
     proba = f"Nous estimons la probabilité de default du client à : {results['proba_default'].values[0]*100:.2f}%"
     return verdict, proba
 
-def gauge(num_client, seuil):
-    value = pred_data[pred_data["client_num"]==num_client]["proba_default"].values[0]
+def gauge(df, num_client, seuil):
+    value = df[df["client_num"]==num_client]["proba_default"].values[0]
     if value > seuil:
         color = "orange"
     else:
@@ -61,14 +65,13 @@ def gauge(num_client, seuil):
     
     return(fig)
 
-
-def st_shap(plot, height=None):
+def st_shap(plot, height=None): # plus utilisé
    shap_html = f"<head>{shap.getjs()}</head><body>{plot.html()}</body>"
    components.html(shap_html, height=height)
 
-def get_explanation(num_client):
+def get_explanation(df, num_client):
     scaled_data = scaler.transform(data)
-    idx = pred_data.index[pred_data["client_num"]==num_client].values[0]
+    idx = df.index[df["client_num"]==num_client].values[0]
     data_idx = scaled_data[idx].reshape(1,-1)
     shap_values = explainer.shap_values(data_idx, l1_reg="aic")
     #st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0],feature_names=data.columns))
@@ -84,9 +87,9 @@ def get_explanation(num_client):
     df_feat = data[data.index==num_client][list_feat].transpose().round(2)
     return(fig, df_feat)
 
-def get_waterfall(num_client):
+def get_waterfall(df, num_client): #plus utilisé
     scaled_data = scaler.transform(data)
-    idx = pred_data.index[pred_data["client_num"]==num_client].values[0]
+    idx = df.index[df["client_num"]==num_client].values[0]
     data_idx = scaled_data[idx].reshape(1,-1)
     shap_values = explainer.shap_values(data, l1_reg="aic")
     exp = shap.Explanation(shap_values[1], explainer.expected_value[1], data_idx, feature_names=data.columns)
@@ -144,20 +147,21 @@ with st.container():
     st.title("Prédiction de la capacité de remboursement d'un demandeur de prêt")
     st.markdown("*Outil de prédiction développé dans le cadre du projet 7 du parcours OC Data Science*")
     st.markdown('##')
+
 with st.container():
+    
     option = st.selectbox("Veuillez spécifier le numéro d'identification du demandeur de prêt",(data.index))
-
     if st.button("Prediction"):
-
         tab1, tab2, tab3 = st.tabs(["Prediction", "Positionnement du demandeur de crédit  \npar rapport aux autres demandes", "Positionnement du demandeur de crédit  \npar rapport aux autres demandes de sa catégorie"])
+        
         with tab1:
-            verdict, proba = get_prediction(option)
+            verdict, proba = get_prediction(pred_data, option)
             st.write(verdict)
             st.write(proba)
             fig, ax = plt.subplots()
-            fig = gauge(option, seuil_predict)
+            fig = gauge(pred_data, option, seuil_predict)
             st.plotly_chart(fig)
-            fig, df_feat = get_explanation(option)
+            fig, df_feat = get_explanation(pred_data, option)
             col1, col2 = st.columns([2,1], gap="small")
             with col1:
                 st.pyplot(fig)
@@ -176,8 +180,4 @@ with st.container():
             st.pyplot(fig2)
 
 
-
-
-   
-
-# from terminal : streamlit run app.py
+ # from terminal : streamlit run app.py
