@@ -131,9 +131,6 @@ def position_label_distrib(det_feat, num_client):
     return fig
 
 
-## afficher seuil de décision ? sur une frise
-
-
 # Configures the default settings of the page (must be the first streamlit command and must be set once)
 st.set_page_config(page_title="Prédiction de la capacité de remboursement d'un demandeur de prêt",
                    page_icon="🏦",
@@ -141,37 +138,43 @@ st.set_page_config(page_title="Prédiction de la capacité de remboursement d'un
                    initial_sidebar_state="expanded")
 
 # title and description
+
+
 with st.container():
-  st.title("Prédiction de la capacité de remboursement d'un demandeur de prêt")
-  st.markdown("*Outil de prédiction développé dans le cadre du projet 7 du parcours OC Data Science*")
-  st.markdown('##')
-  with st.container():
-    option = st.selectbox(
-      "Veuillez spécifier le numéro d'identification du demandeur de prêt",
-      (data.index))
+    st.title("Prédiction de la capacité de remboursement d'un demandeur de prêt")
+    st.markdown("*Outil de prédiction développé dans le cadre du projet 7 du parcours OC Data Science*")
+    st.markdown('##')
+with st.container():
+    option = st.selectbox("Veuillez spécifier le numéro d'identification du demandeur de prêt",(data.index))
+
     if st.button("Prediction"):
-       verdict, proba = get_prediction(option)
-       st.write(verdict)
-       st.write(proba)
-       fig, ax = plt.subplots()
-       fig = gauge(option, seuil_predict)
-       st.plotly_chart(fig)
-       fig, df_feat = get_explanation(option)
-       col1, col2 = st.columns([2,1], gap="small")
-       with col1:
-        st.pyplot(fig)
-       with col2:
-        st.dataframe(df_feat)
-       tab1, tab2 = st.tabs(["Positionnement du demandeur de crédit par rapport aux autres demandes", "Positionnement du demandeur de crédit par rapport aux autres demandes de sa catégorie"])
-       with tab1:
-        fig1 = position_global_distrib(df_feat, option)
-        st.pyplot(fig1)
-       with tab2:
-        fig2 = position_label_distrib(df_feat, option)
-        st.pyplot(fig2)
-  st.markdown('#')
-  with st.container():
-     st.write("❗Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel.❗")
+
+        tab1, tab2, tab3 = st.tabs(["Prediction", "Positionnement du demandeur de crédit  \npar rapport aux autres demandes", "Positionnement du demandeur de crédit  \npar rapport aux autres demandes de sa catégorie"])
+        with tab1:
+            verdict, proba = get_prediction(option)
+            st.write(verdict)
+            st.write(proba)
+            fig, ax = plt.subplots()
+            fig = gauge(option, seuil_predict)
+            st.plotly_chart(fig)
+            fig, df_feat = get_explanation(option)
+            col1, col2 = st.columns([2,1], gap="small")
+            with col1:
+                st.pyplot(fig)
+            with col2:
+                st.dataframe(df_feat)
+            st.markdown('##')
+            with st.container():
+                st.write("❗Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel.❗")
+        
+        with tab2:       
+            fig1 = position_global_distrib(df_feat, option)
+            st.pyplot(fig1)
+
+        with tab3:
+            fig2 = position_label_distrib(df_feat, option)
+            st.pyplot(fig2)
+
 
 
 
