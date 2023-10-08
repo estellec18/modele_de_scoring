@@ -1,10 +1,7 @@
 import pytest
 import pandas as pd
 
-from app import load_data
-from app import def_seuil
-from app import get_prediction
-
+from app import load_data, create_df_proba, get_prediction
 
 # s'assurer que le dataframe retourné n'est pas vide
 def test_not_empty():
@@ -33,10 +30,12 @@ def test_numclient_in_data(load_data_idx:callable):
 
 # test que tel num client que je sais etre 1 est bien 1
 def prediction_positive():
-    list_id = [312338,339038,349304,200971]
+    df_toload = load_data()
+    pred_data = create_df_proba(df_toload, 0.56)
+    list_id = [287819,222036,183296,368092]
     pred = []
     for id in list_id:
-        verdict, proba = get_prediction(id)
+        verdict, proba = get_prediction(pred_data,id)
         pred.append(verdict)
     return set(pred)
 
@@ -47,10 +46,12 @@ def test_application_accepted():
 
 # test que tel num client que je sais etre 0 est bien 0
 def prediction_negative():
-    list_id = [379119,313656,141215,324620]
+    df_toload = load_data()
+    pred_data = create_df_proba(df_toload, 0.56)
+    list_id = [331687,337539,139992,338430]
     pred = []
     for id in list_id:
-        verdict, proba = get_prediction(id)
+        verdict, proba = get_prediction(pred_data,id)
         pred.append(verdict)
     return set(pred)
 
