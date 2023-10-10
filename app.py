@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit.components.v1 as components
 import joblib
 import pandas as pd
 import numpy as np
@@ -7,7 +6,7 @@ import shap
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 
-st.set_option('deprecation.showPyplotGlobalUse', False)
+# from terminal : streamlit run app.py
 
 model = joblib.load("best_xgb.joblib")
 explainer = joblib.load("explainer_xgb.joblib")
@@ -33,7 +32,7 @@ def create_df_proba(df, seuil):
         print("veuillez choisir un seuil adéquat")
         return
 
-data = load_data() # subsample composé de 10% des observations issues du training set + test set
+data = load_data() # subsample composé de 7% des observations issues du training set + test set
 seuil_predict = 0.56
 pred_data = create_df_proba(data, seuil_predict) # df qui indique la proba de default / de non défault / la décision
 
@@ -61,21 +60,15 @@ def gauge(df, num_client, seuil):
         delta = {'reference': seuil, 'increasing': {'color': "red"}, 'decreasing': {'color': "green"}},
         gauge = {'axis': {'range': [None, 1]},
                 'bar' : {'color':color},
-                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': 0.56}}))
+                'threshold' : {'line': {'color': "red", 'width': 4}, 'thickness': 0.75, 'value': seuil}}))
     
     return(fig)
-
-def st_shap(plot, height=None): # plus utilisé
-   shap_html = f"<head>{shap.getjs()}</head><body>{plot.html()}</body>"
-   components.html(shap_html, height=height)
 
 def get_explanation(df, num_client):
     scaled_data = scaler.transform(data)
     idx = df.index[df["client_num"]==num_client].values[0]
     data_idx = scaled_data[idx].reshape(1,-1)
     shap_values = explainer.shap_values(data_idx, l1_reg="aic")
-    #st_shap(shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0],feature_names=data.columns))
-    #fig = shap.force_plot(explainer.expected_value[1], shap_values[1][0], data_idx[0], feature_names=data.columns, matplotlib=True)
     exp = shap.Explanation(shap_values[1], explainer.expected_value[1], data_idx, feature_names=data.columns)
     fig = shap.plots.waterfall(exp[0])
     df_shap = pd.DataFrame(shap_values[1], columns=data.columns)
@@ -86,15 +79,6 @@ def get_explanation(df, num_client):
         df_shap.drop(max_col, axis=1, inplace=True)
     df_feat = data[data.index==num_client][list_feat].transpose().round(2)
     return(fig, df_feat)
-
-def get_waterfall(df, num_client): #plus utilisé
-    scaled_data = scaler.transform(data)
-    idx = df.index[df["client_num"]==num_client].values[0]
-    data_idx = scaled_data[idx].reshape(1,-1)
-    shap_values = explainer.shap_values(data, l1_reg="aic")
-    exp = shap.Explanation(shap_values[1], explainer.expected_value[1], data_idx, feature_names=data.columns)
-    fig = shap.plots.waterfall(exp[0])
-    return fig
 
 def position_global_distrib(det_feat, num_client):
     list_feat = list(det_feat.index)
@@ -134,14 +118,10 @@ def position_label_distrib(det_feat, num_client):
     return fig
 
 
-# Configures the default settings of the page (must be the first streamlit command and must be set once)
 st.set_page_config(page_title="Prédiction de la capacité de remboursement d'un demandeur de prêt",
                    page_icon="🏦",
                    layout="wide",
                    initial_sidebar_state="expanded")
-
-# title and description
-
 
 with st.container():
     st.title("Prédiction de la capacité de remboursement d'un demandeur de prêt")
@@ -178,6 +158,3 @@ with st.container():
         with tab3:
             fig2 = position_label_distrib(df_feat, option)
             st.pyplot(fig2)
-
-
- # from terminal : streamlit run app.py
