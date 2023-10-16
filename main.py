@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import joblib
 import plotly.graph_objects as go
 import shap
-import mpld3
 
 # uvicorn main:app --reload in terminal
 # http://127.0.0.1:8000/ => endpoint/route/api
@@ -18,28 +17,31 @@ class UserInput(BaseModel):
 app = FastAPI()
 
 def load():
-    """fonction qui charge le modele et l'explainer et prépare le dataset sur lequel va porter l'api"""
-    model = joblib.load("best_xgb.joblib")
-    explainer = joblib.load("explainer_xgb.joblib")
+    """fonction qui charge le modele, l'explainer, le dataset sur lequel va porter l'api et le détail des features 
+    utilisés par le modèle"""
+    model = joblib.load("best_xgb_1.joblib")
+    explainer = joblib.load("explainer_xgb_1.joblib")
     scaler = model["scaler"]
-    test = pd.read_csv('./data/clean/test.csv', index_col=0)
+    test = pd.read_csv('./data/test.csv', index_col=0)
     test.set_index("SK_ID_CURR", inplace=True)
-    train = pd.read_csv('./data/clean/training.csv', index_col=0)
-    train.drop("TARGET", axis=1, inplace=True)
-    train.set_index("SK_ID_CURR", inplace=True)
-    concat = pd.concat([train, test])
-    sub_df = concat.sample(frac=0.07, replace=False, random_state=42)
-    features = pd.read_csv('./data/clean/features.csv', index_col=0)
+    # train = pd.read_csv('./data/clean/training.csv', index_col=0)
+    # train.drop("TARGET", axis=1, inplace=True)
+    # train.set_index("SK_ID_CURR", inplace=True)
+    # concat = pd.concat([train, test])
+    sub_df = test.sample(n=500, replace=False, random_state=42)
+    features = pd.read_csv('./data/features.csv', index_col=0)
     return model, explainer, scaler, sub_df, features
 
 def create_df_proba(df, seuil:float):
+    """fonction qui calcule les probabilités d'un client de faire défault à partir du modèle récupéré via la fonction
+    load() et le seuil"""
     proba = model.predict_proba(df)
     df_proba = pd.DataFrame({'client_num':df.index, "proba_no_default":proba.transpose()[0], "proba_default":proba.transpose()[1]})
     df_proba["prediction"] = np.where(df_proba["proba_default"] > seuil, 1, 0)
     return df_proba
 
 model, explainer, scaler, data, features = load()
-seuil_predict = 0.56
+seuil_predict = 0.5
 pred_data = create_df_proba(data, seuil_predict)
 
 @app.get("/")
@@ -63,7 +65,7 @@ def predict(item:UserInput):
     proba = f"Nous estimons la probabilité de default du client à : {results['proba_default'].values[0]*100:.2f}%"
     return {"verdict":verdict, 
             "proba":proba}
-
+  
 @app.post("/gauge")
 def gauge(item:UserInput):
     value = pred_data[pred_data["client_num"]==item.num_client]["proba_default"].values[0]

@@ -4,7 +4,7 @@ import requests
 import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
-import shap
+import shap  
 
 
 st.set_page_config(page_title="Prédiction de la capacité de remboursement d'un demandeur de prêt",
@@ -14,7 +14,7 @@ st.set_page_config(page_title="Prédiction de la capacité de remboursement d'un
 
 with st.container():
     st.title("Prédiction de la capacité de remboursement d'un demandeur de prêt")
-    st.markdown("*Outil de prédiction développé dans le cadre du projet 7 du parcours OC Data Science*")
+    st.markdown("❗*Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel*❗")
     st.markdown('##')
 
 req_i = requests.post("http://127.0.0.1:8000/id_client")
@@ -56,6 +56,3 @@ if st.button("Prediction"):
     st.dataframe(resultat3["df_feat"])  
 
     st.components.v1.html(resultat3["fig"], height=500)
-
-    with st.container():
-        st.write("❗Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel.❗")
