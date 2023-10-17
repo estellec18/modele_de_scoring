@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import plotly.graph_objects as go
 import shap  
 
+#https://credit-scoring-wip-e3ee4a06df88.herokuapp.com/
 
 st.set_page_config(page_title="Prédiction de la capacité de remboursement d'un demandeur de prêt",
                    page_icon="🏦",
@@ -17,7 +18,7 @@ with st.container():
     st.markdown("❗*Cet outil permet d'assister à la prise de décision et doit être utilisé conjointement avec une analyse approfondie réalisée par un professionel*❗")
     st.markdown('##')
 
-req_i = requests.post("http://127.0.0.1:8000/id_client")
+req_i = requests.post("https://credit-scoring-wip-e3ee4a06df88.herokuapp.com/id_client")
 resultat_i = req_i.json()
 
 st.sidebar.markdown("Selection du client")
@@ -28,7 +29,7 @@ if st.button("Prediction"):
 
     schema = {"num_client": option, "feat":"string"}
         
-    req = requests.post("http://127.0.0.1:8000/perso_info", json=schema)
+    req = requests.post("https://credit-scoring-wip-e3ee4a06df88.herokuapp.com/perso_info", json=schema)
     resultat = req.json()
     if resultat["gender"] == 0:
         st.sidebar.write(f"Genre:   Female")
@@ -41,17 +42,17 @@ if st.button("Prediction"):
     st.sidebar.write(f"Source du revenu:   {resultat['income_type']}")
 
                 
-    req1 = requests.post("http://127.0.0.1:8000/predict", json=schema)
+    req1 = requests.post("https://credit-scoring-wip-e3ee4a06df88.herokuapp.com/predict", json=schema)
     resultat1 = req1.json()
     st.write(resultat1["verdict"])
     st.write(resultat1["proba"])
             
-    req2 = requests.post("http://127.0.0.1:8000/gauge", json=schema)
+    req2 = requests.post("https://credit-scoring-wip-e3ee4a06df88.herokuapp.com/gauge", json=schema)
     resultat2 = req2.json()
     st.components.v1.html(resultat2["fig"], height=500)
 
 
-    req3 = requests.post("http://127.0.0.1:8000/explanation", json=schema)
+    req3 = requests.post("https://credit-scoring-wip-e3ee4a06df88.herokuapp.com/explanation", json=schema)
     resultat3 = req3.json()
     st.dataframe(resultat3["df_feat"])  
 
