@@ -5,6 +5,7 @@ La société financière "Prêt à dépenser" propose des crédits à la consomm
 L’entreprise souhaite mettre en œuvre **un outil de “scoring crédit”** pour (1) calculer la probabilité qu’un client rembourse son crédit et (2) classifier la demande en crédit accordé ou refusé. Elle souhaite donc développer un algorithme de classification en s’appuyant sur des sources de données variées (données comportementales, données provenant d'autres institutions financières, etc.)
 
 source des données : https://www.kaggle.com/c/home-credit-default-risk/data
+
 travaux d'analyse des données : [01_EDA.ipynb](01_EDA.ipynb)
 
 ## Missions:
