@@ -9,8 +9,8 @@ source des données : https://www.kaggle.com/c/home-credit-default-risk/data
 travaux d'analyse des données : [01_EDA.ipynb](01_EDA.ipynb)
 
 ## Missions:
-- Construire un modèle de scoring qui donnera une prédiction sur la probabilité de faillite d'un client de façon automatique ([02_Modelisation.ipynb](02_Modelisation.ipynb) & [best_xgb_1.joblib](best_xgb_1.joblib))
-- Analyser les features qui contribuent le plus au modèle, d’une manière générale (feature importance globale) et au niveau d’un client (feature importance locale), afin, dans un soucis de transparence, de permettre à un chargé d’études de mieux comprendre le score attribué par le modèle ([02_Modelisation.ipynb](02_Modelisation.ipynb) & [explainer_xgb_1.joblib](explainer_xgb_1.joblib))
+- Construire un modèle de scoring qui donnera une prédiction sur la probabilité de faillite d'un client de façon automatique ([02_Modelisation.ipynb](02_Modelisation.ipynb) & [best_xgb_1_2.joblib](best_xgb_1_2.joblib))
+- Analyser les features qui contribuent le plus au modèle, d’une manière générale (feature importance globale) et au niveau d’un client (feature importance locale), afin, dans un soucis de transparence, de permettre à un chargé d’études de mieux comprendre le score attribué par le modèle ([02_Modelisation.ipynb](02_Modelisation.ipynb) & [explainer_xgb_1_2.joblib](explainer_xgb_1_2.joblib))
 - Mettre en production le modèle de scoring de prédiction à l’aide d’une API ([cf. repository de l'API](https://github.com/estellec18/app_credit_scoring)) et réaliser une interface de test de cette API ([frontend.py](frontend.py))
 - Mettre en oeuvre une approche globale MLOps de bout en bout, du tracking des expérimentations à l’analyse en production du data drift
 
@@ -23,4 +23,4 @@ Fonctionnement de l'interface :
     - des informations concernant les principales features responsables du score
 
 Nous avons également testé l’utilisation de la librairie evidently pour détecter du Data Drift en production (avec le dataset “application_train” représentant les datas pour la modélisation et le dataset “application_test” représentant les datas de nouveaux clients une fois le modèle en production).
-- rapport de data drift généré par evidently [data_drift_report_global.html](data_drift_report_global.html)
+- rapport de data drift généré par evidently [data_drift_report.html](data_drift_report.html)
