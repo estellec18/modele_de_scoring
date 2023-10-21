@@ -14,5 +14,13 @@ travaux d'analyse des données : [01_EDA.ipynb](01_EDA.ipynb)
 - Mettre en production le modèle de scoring de prédiction à l’aide d’une API ([cf. repository de l'API](https://github.com/estellec18/app_credit_scoring)) et réaliser une interface de test de cette API ([frontend.py](frontend.py))
 - Mettre en oeuvre une approche globale MLOps de bout en bout, du tracking des expérimentations à l’analyse en production du data drift
 
+Fonctionnement de l'interface :
+- l'utilisateur choisit (dans une liste déroulante) le numéro du client dont il souhaite connaitre les résultats
+- l'utilisateur clique sur le bouton "Prédiction" pour générer :
+    - des informations générales sur le client en question (sexe, revenue, occupation...)
+    - la probabilité de défault du client ainsi que sa classe (accepté ou refusé)
+    - la visualisation du score du client sur une jauge
+    - des informations concernant les principales features responsables du score
+
 Nous avons également testé l’utilisation de la librairie evidently pour détecter du Data Drift en production (avec le dataset “application_train” représentant les datas pour la modélisation et le dataset “application_test” représentant les datas de nouveaux clients une fois le modèle en production).
 - rapport de data drift généré par evidently [data_drift_report_global.html](data_drift_report_global.html)
