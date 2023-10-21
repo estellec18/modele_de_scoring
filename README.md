@@ -17,8 +17,8 @@ travaux d'analyse des données : [01_EDA.ipynb](01_EDA.ipynb)
 Fonctionnement de l'interface :
 - l'utilisateur choisit (dans une liste déroulante) le numéro du client dont il souhaite connaitre les résultats
 - l'utilisateur clique sur le bouton "Prédiction" pour générer :
-    - des informations générales sur le client en question (sexe, revenue, occupation...)
-    - la probabilité de défault du client ainsi que sa classe (accepté ou refusé)
+    - des informations générales sur le client en question (sexe, revenu, occupation...)
+    - la probabilité de défault du client ainsi que sa classe (demande de credit acceptée ou refusée)
     - la visualisation du score du client sur une jauge
     - des informations concernant les principales features responsables du score
 
