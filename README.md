@@ -6,6 +6,7 @@ La société financière "Prêt à dépenser" propose des crédits à la consomm
 L’entreprise souhaite mettre en œuvre **un outil de “scoring crédit”** pour (1) calculer la probabilité qu’un client rembourse son crédit et (2) classifier la demande en crédit accordé ou refusé. Elle souhaite donc développer un algorithme de classification en s’appuyant sur des sources de données variées (données comportementales, données provenant d'autres institutions financières, etc.)
 
 source des données : https://www.kaggle.com/c/home-credit-default-risk/data
+
 travaux d'analyse des données : [01_EDA.ipynb](01_EDA.ipynb)
 
 ## Objectif:
@@ -22,7 +23,8 @@ Fonctionnement de l'interface :
     - la probabilité de défault du client ainsi que sa classe (demande de credit acceptée ou refusée)
     - la visualisation du score du client sur une jauge
     - des informations concernant les principales features responsables du score et le positionnement du client par rapport au reste de la population
- [lien vers le repository du dashboard](https://github.com/estellec18/dashboard_credit_scoring)
+
+[lien vers le repository du dashboard](https://github.com/estellec18/dashboard_credit_scoring)
 
 Nous avons également testé l’utilisation de la librairie evidently pour détecter du Data Drift en production (avec le dataset “application_train” représentant les datas pour la modélisation et le dataset “application_test” représentant les datas de nouveaux clients une fois le modèle en production).
 - rapport de data drift généré par evidently [data_drift_report.html](data_drift_report.html)
