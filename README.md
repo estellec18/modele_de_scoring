@@ -26,5 +26,5 @@ Fonctionnement de l'interface :
 
 [lien vers le repository du dashboard](https://github.com/estellec18/dashboard_credit_scoring)
 
-Nous avons également testé l’utilisation de la librairie evidently pour détecter du Data Drift en production (avec le dataset “application_train” représentant les datas pour la modélisation et le dataset “application_test” représentant les datas de nouveaux clients une fois le modèle en production).
+La librairie evidently a également été testée pour détecter un éventuel Data Drift en production (avec le dataset “application_train” représentant les datas pour la modélisation et le dataset “application_test” représentant les datas de nouveaux clients une fois le modèle en production).
 - rapport de data drift généré par evidently [data_drift_report.html](data_drift_report.html)
