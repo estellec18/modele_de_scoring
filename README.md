@@ -1,9 +1,10 @@
 # modele_de_scoring
 
-*Projet développé dans le cadre de la formation Data Scientist OC (RNCP niveau 7)*
+*Projet développé dans le cadre du parcours Data Scientist d'OpenClassrooms en partenariat avec CentralSupélec (RNCP niveau 7)*
 
+## Contexte
 La société financière "Prêt à dépenser" propose des crédits à la consommation pour des personnes ayant peu ou pas d'historique de prêt.
-L’entreprise souhaite mettre en œuvre **un outil de “scoring crédit”** pour (1) calculer la probabilité qu’un client rembourse son crédit et (2) classifier la demande en crédit accordé ou refusé. Elle souhaite donc développer un algorithme de classification en s’appuyant sur des sources de données variées (données comportementales, données provenant d'autres institutions financières, etc.)
+L’entreprise souhaite mettre en œuvre **un outil de “scoring crédit”** pour (1) calculer la probabilité qu’un client rembourse son crédit et (2) classifier la demande en crédit accordé ou refusé. Elle souhaite donc développer un **algorithme de classification** en s’appuyant sur des sources de données variées (données comportementales, données provenant d'autres institutions financières, etc.)
 
 source des données : https://www.kaggle.com/c/home-credit-default-risk/data
 
@@ -15,6 +16,7 @@ travaux d'analyse des données : [01_EDA.ipynb](01_EDA.ipynb)
 - Mettre en production le modèle de scoring de prédiction à l’aide d’une API ([cf. repository de l'API](https://github.com/estellec18/app_credit_scoring)) et réaliser une interface de test de cette API ([frontend.py](frontend.py))
 - Mettre en oeuvre une approche globale MLOps de bout en bout, du tracking des expérimentations à l’analyse en production du data drift
 
+#
 
 Fonctionnement de l'interface :
 - l'utilisateur choisit (dans une liste déroulante) le numéro du client dont il souhaite connaitre les résultats
